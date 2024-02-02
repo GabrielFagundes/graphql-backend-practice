@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id          Int      @id
+  name        String
+  position    String
+  dateOfBirth DateTime
+  nationality String?
+  teamId      Int?
+  coachId     Int?
+
+  // Define relationships
+  coach Coach? @relation(fields: [coachId], references: [id])
+  Team  Team?  @relation(fields: [teamId], references: [id])
+}
+
+model Team {
+  id            Int     @id
+  name          String
+  tla           String?
+  shortName     String?
+  areaName      String?
+  address       String?
+  competitionId Int
+
+  // Define relationships
+  competition Competition @relation(fields: [competitionId], references: [id])
+  Player      Player[]
+  Coach       Coach[]
+}
+
+model Competition {
+  id       Int    @id
+  name     String
+  code     String
+  areaName String
+  teams    Team[]
+}
+
+model Coach {
+  id          Int      @id
+  name        String
+  dateOfBirth DateTime
+  nationality String?
+  teamId      Int?
+
+  // Define relationships
+  team   Team?    @relation(fields: [teamId], references: [id])
+  Player Player[]
+}
