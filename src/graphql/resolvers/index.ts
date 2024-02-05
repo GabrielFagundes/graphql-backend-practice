@@ -24,22 +24,12 @@ const resolvers = {
         getTeams: async () => await TeamController.getAllTeams(),
         getTeamMembersByLeague: async (
             _parent: unknown,
-            {
-                leagueCode,
-                teamName,
-            }: { leagueCode: string; teamName: string | undefined }
+            { leagueCode }: { leagueCode: string }
         ) => {
-            return await PlayerController.getTeamMembersByLeague(
-                leagueCode,
-                teamName
-            );
+            return await PlayerController.getTeamMembersByLeague(leagueCode);
         },
         getTeamByName: async (_parent: unknown, { name }: { name: string }) => {
-            const response = await TeamController.getTeamByName(name);
-
-            console.log("response -> ", response);
-
-            return response;
+            return await TeamController.getTeamByName(name);
         },
         teamMembers: (
             _parent: unknown,

@@ -1,6 +1,6 @@
 type Query {
     getTeams: [Team]!
-    getTeamMembersByLeague(leagueCode: String!, teamName: String): [TeamMember]!
+    getTeamMembersByLeague(leagueCode: String!): [TeamMember]!
     getTeamByName(name: String!): Team
     teamMembers(teamId: ID!): [TeamMember]!
 }

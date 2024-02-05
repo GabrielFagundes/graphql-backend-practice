@@ -25,18 +25,29 @@ class CoachService {
         });
     }
 
-    async getCoachesByLeague(leagueCode: string, teamName?: string) {
-        return prisma.coach.findMany({
-            where: {
-                team: {
-                    competitionCode: leagueCode,
-                    ...(teamName && { name: teamName }),
-                },
-            },
-            include: {
-                team: true,
-            },
+    async getCoachesByLeague(leagueCode: string) {
+        const competition = await prisma.competition.findUnique({
+            where: { code: leagueCode },
         });
+
+        if (!competition) {
+            throw new Error(`Competition with code ${leagueCode} not found`);
+        }
+
+        const teams = await prisma.competitionTeam.findMany({
+            where: { competitionCode: competition.code },
+            include: { team: true },
+        });
+
+        const coaches = [];
+        for (const { team } of teams) {
+            const coach = await prisma.coach.findFirst({
+                where: { teamId: team.id },
+            });
+            coaches.push(coach);
+        }
+
+        return coaches;
     }
 }
 

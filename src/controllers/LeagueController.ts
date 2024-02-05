@@ -1,4 +1,3 @@
-import HttpService from "../services/HttpService";
 import CompetitionService from "../services/CompetitionService";
 import TeamService from "../services/TeamService";
 import PlayerService from "../services/PlayerService";
@@ -9,31 +8,30 @@ import { CompetitionModel } from "../models/Competition";
 import { TeamModel } from "../models/Team";
 import { toISODate } from "../utils/toISODate";
 import prisma from "../db/prismaSingleton"; // Import your singleton Prisma client instance
+import { fetchFootballData } from "../utils/fetchFooballData";
 
 class LeagueController {
     async importLeagueData(leagueCode: string) {
         // Start a transaction
         const transaction = await prisma.$transaction(async (transaction) => {
             try {
-                const url = `http://api.football-data.org/v4/competitions/${leagueCode}/teams`;
-                const { data } = await HttpService.get(url, {
-                    "X-Auth-Token": process.env.FOOTBALL_DATA_API_KEY || "",
-                });
+                const url = `/competitions/${leagueCode}/teams`;
+                const { teams, competition: competitionData } =
+                    await fetchFootballData(url);
 
-                if (data.length <= 0) {
+                if (!teams || teams.length <= 0) {
                     return {
                         success: false,
                         message: "Couldn't find any data to import",
-                        league: null,
                     };
                 }
 
                 // Import competition using the transaction instance
                 const competition: CompetitionModel = {
-                    id: data.competition?.id,
-                    name: data.competition?.name,
-                    code: data.competition?.code,
-                    areaName: data.teams[0]?.area?.name,
+                    id: competitionData?.id,
+                    name: competitionData?.name,
+                    code: competitionData?.code,
+                    areaName: teams[0]?.area?.name,
                 };
                 await CompetitionService.upsertCompetition(
                     competition,
@@ -41,7 +39,7 @@ class LeagueController {
                 );
 
                 // Iterate over each team and import players or coach
-                for (const team of data.teams) {
+                for (const team of teams) {
                     const teamData: TeamModel = {
                         id: team.id,
                         name: team.name,
@@ -50,11 +48,38 @@ class LeagueController {
                         areaName: team.area?.name,
                         address: team.address,
                     };
-                    const createdTeam = await TeamService.upsertTeam(
+
+                    const existingTeam = await prisma.team.findUnique({
+                        where: { id: team.id },
+                    });
+
+                    const createdOrUpdatedTeam = await TeamService.upsertTeam(
                         teamData,
-                        competition?.code || "",
                         transaction
                     );
+
+                    // Checking if the team is already related to the competition
+                    const existingRelation =
+                        await transaction.competitionTeam.findUnique({
+                            where: {
+                                competitionCode_teamId: {
+                                    competitionCode: competition.code,
+                                    teamId: team.id,
+                                },
+                            },
+                        });
+
+                    if (!existingRelation) {
+                        // Creating a new relation if it doesn't exist
+                        await transaction.competitionTeam.create({
+                            data: {
+                                competitionCode: competition.code,
+                                teamId: team.id,
+                            },
+                        });
+                    }
+
+                    if (!existingTeam) continue;
 
                     // Import players or coach based on the squad data, using the transaction instance
                     if (team.squad && team.squad.length > 0) {
@@ -68,7 +93,7 @@ class LeagueController {
                             };
                             await PlayerService.upsertPlayer(
                                 playerData,
-                                createdTeam.id || 0,
+                                createdOrUpdatedTeam.id || 0,
                                 transaction
                             );
                         }
@@ -81,7 +106,7 @@ class LeagueController {
                         };
                         await CoachService.upsertCoach(
                             coachData,
-                            createdTeam.id || 0,
+                            createdOrUpdatedTeam.id || 0,
                             transaction
                         );
                     }
@@ -97,7 +122,7 @@ class LeagueController {
             }
         });
 
-        return transaction; // Return the result of the transaction
+        return transaction;
     }
 }
 

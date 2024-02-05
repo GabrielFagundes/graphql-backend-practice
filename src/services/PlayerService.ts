@@ -23,18 +23,31 @@ class PlayerService {
         });
     }
 
-    async getPlayersByLeague(leagueCode: string, teamName?: string) {
-        return prisma.player.findMany({
-            where: {
-                Team: {
-                    competitionCode: leagueCode,
-                    ...(teamName && { name: teamName }),
-                },
-            },
-            include: {
-                Team: true,
-            },
+    async getPlayersByLeague(leagueCode: string) {
+        const competition = await prisma.competition.findUnique({
+            where: { code: leagueCode },
         });
+
+        if (!competition) {
+            throw new Error(`Competition with code ${leagueCode} not found`);
+        }
+
+        // Then, get teams associated with this competition
+        const teams = await prisma.competitionTeam.findMany({
+            where: { competitionCode: competition.code },
+            include: { team: true },
+        });
+
+        // Finally, fetch players for these teams
+        const players = [];
+        for (const { team } of teams) {
+            const teamPlayers = await prisma.player.findMany({
+                where: { teamId: team.id },
+            });
+            players.push(...teamPlayers);
+        }
+
+        return players;
     }
 }
 

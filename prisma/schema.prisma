@@ -17,31 +17,38 @@ model Player {
   coachId     Int?
 
   // Define relationships
-  coach Coach? @relation(fields: [coachId], references: [id])
-  Team  Team?  @relation(fields: [teamId], references: [id])
+  Team Team? @relation(fields: [teamId], references: [id])
 }
 
 model Team {
-  id              Int     @id
-  name            String
-  tla             String?
-  shortName       String?
-  areaName        String?
-  address         String?
-  competitionCode String
+  id        Int     @id
+  name      String
+  tla       String?
+  shortName String?
+  areaName  String?
+  address   String?
 
   // Define relationships
-  competition Competition @relation(fields: [competitionCode], references: [code])
-  Player      Player[]
-  Coach       Coach[]
+  Player          Player[]
+  Coach           Coach[]
+  CompetitionTeam CompetitionTeam[]
 }
 
 model Competition {
-  id       Int    @id
-  name     String
-  code     String @unique
-  areaName String
-  teams    Team[]
+  id              Int               @id
+  name            String
+  code            String            @unique
+  areaName        String
+  CompetitionTeam CompetitionTeam[]
+}
+
+model CompetitionTeam {
+  competitionCode String
+  teamId          Int
+  competition     Competition @relation(fields: [competitionCode], references: [code])
+  team            Team        @relation(fields: [teamId], references: [id])
+
+  @@id([competitionCode, teamId])
 }
 
 model Coach {
@@ -52,6 +59,5 @@ model Coach {
   teamId      Int?
 
   // Define relationships
-  team   Team?    @relation(fields: [teamId], references: [id])
-  Player Player[]
+  team Team? @relation(fields: [teamId], references: [id])
 }
