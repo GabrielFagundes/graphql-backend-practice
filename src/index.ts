@@ -52,6 +52,10 @@ await apollo.start();
 // Apply Apollo Server to Fastify
 await server.register(fastifyApollo(apollo));
 
+server.get("/", async (_, reply) => {
+    reply.redirect("/graphql");
+});
+
 // Start the server
 const start = async () => {
     try {

@@ -1,4 +1,5 @@
 import { CoachModel } from "./Coach";
+import { CompetitionModel } from "./Competition";
 import { PlayerModel } from "./Player";
 
 export interface TeamModel {

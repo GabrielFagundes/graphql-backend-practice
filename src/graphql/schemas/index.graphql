@@ -1,9 +1,8 @@
 type Query {
-    getPlayer(id: ID!): Player
-    getTeam(id: ID!): Team
-    getCompetition(id: ID!): Competition
-    players(leagueCode: String!, teamName: String): [Player]
-    team(name: String!): Team
+    getTeams: [Team]!
+    getTeamMembersByLeague(leagueCode: String!, teamName: String): [TeamMember]!
+    getTeamByName(name: String!): Team
+    teamMembers(teamId: ID!): [TeamMember]!
 }
 
 type Mutation {
@@ -11,33 +10,39 @@ type Mutation {
 }
 
 type Competition {
-    name: String
-    code: String
-    areaName: String
-    teams: [Team]
+    id: ID!
+    name: String!
+    code: String!
+    areaName: String!
 }
 
 type Team {
+    id: ID!
     name: String
     tla: String
     shortName: String
     areaName: String
     address: String
     players: [Player]
+    coach: Coach
 }
 
 type Player {
-    name: String
-    position: String
-    dateOfBirth: String
-    nationality: String
+    id: ID!
+    name: String!
+    position: String!
+    dateOfBirth: String!
+    nationality: String!
 }
 
 type Coach {
-    name: String
-    dateOfBirth: String
-    nationality: String
+    id: ID!
+    name: String!
+    dateOfBirth: String!
+    nationality: String!
 }
+
+union TeamMember = Player | Coach
 
 type LeagueImportResponse {
     success: Boolean

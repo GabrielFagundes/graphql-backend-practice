@@ -1,19 +1,39 @@
-import { PrismaClient } from "@prisma/client";
 import { TeamModel } from "../models/Team";
-
-const prisma = new PrismaClient();
+import { Prisma } from "@prisma/client";
+import prisma from "../db/prismaSingleton";
 
 class TeamService {
     async upsertTeam(
         teamData: TeamModel,
-        competitionId: number
+        competitionCode: string,
+        tx?: Prisma.TransactionClient
     ): Promise<TeamModel> {
         if (!teamData.id) throw new Error("Invalid team data");
-
-        return await prisma.team.upsert({
+        const prismaClient = tx || prisma;
+        return await prismaClient.team.upsert({
             where: { id: teamData.id },
-            update: { ...teamData, competitionId },
-            create: { ...teamData, competitionId },
+            update: { ...teamData, competitionCode },
+            create: { ...teamData, competitionCode },
+        });
+    }
+
+    async getAllTeams() {
+        return prisma.team.findMany({});
+    }
+
+    async getTeamByName(name: string) {
+        console.log("name", name);
+        return prisma.team.findFirst({
+            where: {
+                name: {
+                    contains: name,
+                    mode: "insensitive",
+                },
+            },
+            include: {
+                Player: true,
+                Coach: true,
+            },
         });
     }
 }

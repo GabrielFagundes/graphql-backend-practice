@@ -1,71 +1,17 @@
 import LeagueController from "../../controllers/LeagueController";
-
-// Sample data (replace with your actual data source)
-const players = [
-    {
-        id: "1",
-        name: "Player 1",
-        position: "Forward",
-        dateOfBirth: "1990-01-01",
-        nationality: "Country A",
-    },
-    {
-        id: "2",
-        name: "Player 2",
-        position: "Midfielder",
-        dateOfBirth: "1995-02-02",
-        nationality: "Country B",
-    },
-    // Add more players...
-];
-
-const teams = [
-    {
-        id: "1",
-        name: "Team A",
-        tla: "TA",
-        shortName: "A",
-        areaName: "Region X",
-        address: "123 Main St",
-        players: [players[0]],
-    },
-    {
-        id: "2",
-        name: "Team B",
-        tla: "TB",
-        shortName: "B",
-        areaName: "Region Y",
-        address: "456 Elm St",
-        players: [players[1]],
-    },
-    // Add more teams...
-];
-
-const competitions = [
-    {
-        id: "1",
-        name: "Competition 1",
-        code: "C1",
-        areaName: "Region X",
-        teams: [teams[0], teams[1]],
-    },
-    // Add more competitions...
-];
+import PlayerController from "../../controllers/PlayerController";
+import TeamController from "../../controllers/TeamController";
+import { TeamMember } from "../../models/TeamMember";
+// import { competitionController } from '../controllers/CompetitionController'; // Assuming similar setup
 
 const resolvers = {
     Mutation: {
         importLeague: async (
             _parent: unknown,
             args: { leagueCode: string }
-            // _context: unknown,
-            // _info: unknown
         ) => {
             try {
-                // Use the LeagueController to import league data
-                const response = await LeagueController.importLeagueData(
-                    args.leagueCode
-                );
-                return response;
+                return await LeagueController.importLeagueData(args.leagueCode);
             } catch (error) {
                 console.error("Failed to import league data:", error);
                 // Depending on your error handling strategy, you might want to throw an error,
@@ -75,30 +21,40 @@ const resolvers = {
         },
     },
     Query: {
-        getPlayer: (_: unknown, args: { id: string }) => {
-            return players.find((player) => player.id === args.id);
-        },
-        getTeam: (_: unknown, args: { id: string }) => {
-            return teams.find((team) => team.id === args.id);
-        },
-        getCompetition: (_: unknown, args: { id: string }) => {
-            return competitions.find(
-                (competition) => competition.id === args.id
+        getTeams: async () => await TeamController.getAllTeams(),
+        getTeamMembersByLeague: async (
+            _parent: unknown,
+            {
+                leagueCode,
+                teamName,
+            }: { leagueCode: string; teamName: string | undefined }
+        ) => {
+            return await PlayerController.getTeamMembersByLeague(
+                leagueCode,
+                teamName
             );
+        },
+        getTeamByName: async (_parent: unknown, { name }: { name: string }) => {
+            const response = await TeamController.getTeamByName(name);
+
+            console.log("response -> ", response);
+
+            return response;
+        },
+        teamMembers: (
+            _parent: unknown,
+            args: { teamId: number }
+        ): Promise<TeamMember[]> => {
+            return TeamController.getTeamMembers(args.teamId);
         },
     },
-    Team: {
-        players: (parent: any) => {
-            return parent.players.map((playerId: string) =>
-                players.find((player) => player.id === playerId)
-            );
-        },
-    },
-    Competition: {
-        teams: (parent: any) => {
-            return parent.teams.map((teamId: string) =>
-                teams.find((team) => team.id === teamId)
-            );
+    TeamMember: {
+        __resolveType(obj: TeamMember) {
+            if (obj.position) {
+                return "Player";
+            } else {
+                return "Coach";
+            }
         },
     },
 };
