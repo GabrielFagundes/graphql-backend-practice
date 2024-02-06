@@ -1,23 +1,8 @@
-version: "3"
-
+version: "3.8"
 services:
-    nodejs:
-        build:
-            context: .
-            dockerfile: Dockerfile
-        environment:
-            POSTGRES_HOST: postgres
-            POSTGRES_PORT: 5432
-            POSTGRES_USER: santexuser
-            POSTGRES_PASSWORD: santexpasswd
-            POSTGRES_DB: santexdb
-        ports:
-            - "3000:3000"
-        depends_on:
-            - postgres
-
-    postgres:
-        image: postgres:latest
+    db:
+        container_name: santex-backend-test-db
+        image: postgres:14
         environment:
             POSTGRES_USER: santexuser
             POSTGRES_PASSWORD: santexpasswd
@@ -26,6 +11,20 @@ services:
             - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
+
+    app:
+        container_name: santex-backend-test-app
+        build: .
+        ports:
+            - "4001:4001"
+        environment:
+            DATABASE_URL: postgresql://santexuser:santexpasswd@0.0.0.0:5432/santexdb?schema=public
+        depends_on:
+            - db
+        command: npm run start
+        volumes:
+            - .:/app
+            - /app/node_modules
 
 volumes:
     postgres_data:

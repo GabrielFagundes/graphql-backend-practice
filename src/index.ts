@@ -20,12 +20,12 @@ const correctPath = path.resolve(
 // Read and parse the schema file
 const schemaPath = path.join(correctPath, "./graphql/schemas/index.graphql");
 
-// Import your GraphQL schema and resolvers
+// Imports the GraphQL schema and resolvers
 const typeDefs = gql`
     ${fs.readFileSync(schemaPath, "utf8")}
 `;
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4001;
 
 const server = fastify();
 const apollo = new ApolloServer<BaseContext>({
@@ -34,7 +34,7 @@ const apollo = new ApolloServer<BaseContext>({
     plugins: [fastifyApolloDrainPlugin(server)],
 });
 
-// Apply Apollo Server to Fastify
+// Applies Apollo Server to Fastify
 await apollo.start();
 await server.register(fastifyApollo(apollo));
 
@@ -42,10 +42,10 @@ server.get("/", async (_, reply) => {
     reply.redirect("/graphql");
 });
 
-// Start the server
+// Starts the server
 const start = async () => {
     try {
-        await server.listen({ port: 3000 });
+        await server.listen({ port: 4001 });
         console.log(`Server running at http://localhost:${PORT}`);
     } catch (err) {
         console.error("Error starting server:", err);

@@ -10,8 +10,8 @@ declare global {
 if (process.env.NODE_ENV === "production") {
     prisma = new PrismaClient();
 } else {
-    // ensure the Prisma client is reused during hot-reloading
-    // this will too many instances of Prisma Client in development
+    // ensures the Prisma client is reused during hot-reloading
+    // this will prevent too many instances of Prisma Client in development
     if (!global.prisma) {
         global.prisma = new PrismaClient();
     }

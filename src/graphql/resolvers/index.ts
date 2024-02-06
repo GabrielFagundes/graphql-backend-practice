@@ -1,6 +1,7 @@
 import LeagueController from "../../controllers/LeagueController.js";
 import PlayerController from "../../controllers/PlayerController.js";
 import TeamController from "../../controllers/TeamController.js";
+import { TeamMember } from "../../models/TeamMember.js";
 import { formatZodError } from "../../utils/formatZodError.js";
 import { logger } from "../../utils/logger.js";
 import {
@@ -52,6 +53,21 @@ const resolvers = {
             }
 
             return await TeamController.getTeamByName(name);
+        },
+        teamMembers: (
+            _parent: unknown,
+            args: { teamId: number }
+        ): Promise<TeamMember[]> => {
+            return TeamController.getTeamMembers(args.teamId);
+        },
+    },
+    TeamMember: {
+        __resolveType(obj: TeamMember) {
+            if (obj.position) {
+                return "Player";
+            } else {
+                return "Coach";
+            }
         },
     },
 };

@@ -1,8 +1,8 @@
+import { TeamModel } from "./../models/Team";
 import { TeamMember } from "../models/TeamMember.js";
 import CoachService from "../services/CoachService.js";
 import PlayerService from "../services/PlayerService.js";
 import TeamService from "../services/TeamService.js";
-import { Team as TeamModel } from "@prisma/client";
 
 class TeamController {
     async getAllTeams(): Promise<TeamModel[]> {

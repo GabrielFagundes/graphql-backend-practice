@@ -1,5 +1,3 @@
-// src/validationSchemas.js
-
 import { z } from "zod";
 
 const competitionSchema = z.object({
