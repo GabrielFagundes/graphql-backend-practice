@@ -1,8 +1,12 @@
-import LeagueController from "../../controllers/LeagueController";
-import PlayerController from "../../controllers/PlayerController";
-import TeamController from "../../controllers/TeamController";
-import { TeamMember } from "../../models/TeamMember";
-// import { competitionController } from '../controllers/CompetitionController'; // Assuming similar setup
+import LeagueController from "../../controllers/LeagueController.js";
+import PlayerController from "../../controllers/PlayerController.js";
+import TeamController from "../../controllers/TeamController.js";
+import { formatZodError } from "../../utils/formatZodError.js";
+import { logger } from "../../utils/logger.js";
+import {
+    teamNameInput,
+    leagueCodeInput,
+} from "../../utils/validationSchemas.js";
 
 const resolvers = {
     Mutation: {
@@ -11,11 +15,18 @@ const resolvers = {
             args: { leagueCode: string }
         ) => {
             try {
+                const validatedInput = leagueCodeInput.safeParse(
+                    args.leagueCode
+                );
+                if (!validatedInput.success) {
+                    return new Error(formatZodError(validatedInput.error));
+                }
+
                 return await LeagueController.importLeagueData(args.leagueCode);
             } catch (error) {
-                console.error("Failed to import league data:", error);
-                // Depending on your error handling strategy, you might want to throw an error,
-                // return a specific error message, or handle it in another appropriate manner.
+                logger.error(
+                    `Failed to import league data for: ${args.leagueCode}`
+                );
                 throw new Error("Failed to import league data");
             }
         },
@@ -26,25 +37,21 @@ const resolvers = {
             _parent: unknown,
             { leagueCode }: { leagueCode: string }
         ) => {
+            const validatedInput = leagueCodeInput.safeParse(leagueCode);
+            if (!validatedInput.success) {
+                return new Error(formatZodError(validatedInput.error));
+            }
+
             return await PlayerController.getTeamMembersByLeague(leagueCode);
         },
         getTeamByName: async (_parent: unknown, { name }: { name: string }) => {
-            return await TeamController.getTeamByName(name);
-        },
-        teamMembers: (
-            _parent: unknown,
-            args: { teamId: number }
-        ): Promise<TeamMember[]> => {
-            return TeamController.getTeamMembers(args.teamId);
-        },
-    },
-    TeamMember: {
-        __resolveType(obj: TeamMember) {
-            if (obj.position) {
-                return "Player";
-            } else {
-                return "Coach";
+            const validatedInput = teamNameInput.safeParse(name);
+
+            if (!validatedInput.success) {
+                return new Error(formatZodError(validatedInput.error));
             }
+
+            return await TeamController.getTeamByName(name);
         },
     },
 };

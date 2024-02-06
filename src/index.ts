@@ -6,7 +6,7 @@ import fastify from "fastify";
 import gql from "graphql-tag";
 import path from "path";
 import fs from "fs";
-import resolvers from "./graphql/resolvers/index";
+import resolvers from "./graphql/resolvers/index.js";
 
 // Construct the directory path using import.meta.url
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
@@ -26,30 +26,16 @@ const typeDefs = gql`
 `;
 
 const PORT = process.env.PORT || 3000;
-// const API_KEY = process.env.API_KEY;
 
 const server = fastify();
-
 const apollo = new ApolloServer<BaseContext>({
     typeDefs,
     resolvers,
     plugins: [fastifyApolloDrainPlugin(server)],
 });
 
-await apollo.start();
-
-// Middleware to check the API key in headers
-// server.addHook("onRequest", (request: any, reply: any, done: any) => {
-//     const apiKey = request.headers["x-api-key"];
-//     if (apiKey !== API_KEY) {
-//         reply.status(401).send({ message: "Unauthorized: Invalid API key" });
-//         return;
-//     }
-
-//     done();
-// });
-
 // Apply Apollo Server to Fastify
+await apollo.start();
 await server.register(fastifyApollo(apollo));
 
 server.get("/", async (_, reply) => {

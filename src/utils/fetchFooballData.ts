@@ -1,5 +1,5 @@
 import Bottleneck from "bottleneck";
-import HTTP from "../services/HttpService";
+import HTTP from "../services/HttpService.js";
 
 // Initialize a rate limiter: 10 requests per minute
 const limiter = new Bottleneck({

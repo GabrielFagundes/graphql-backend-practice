@@ -14,7 +14,6 @@ model Player {
   dateOfBirth DateTime
   nationality String?
   teamId      Int?
-  coachId     Int?
 
   // Define relationships
   Team Team? @relation(fields: [teamId], references: [id])

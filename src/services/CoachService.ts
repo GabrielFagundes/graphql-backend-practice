@@ -1,6 +1,6 @@
-import { CoachModel } from "../models/Coach";
+import { CoachModel } from "../models/Coach.js";
 import { Prisma } from "@prisma/client";
-import prisma from "../db/prismaSingleton";
+import prisma from "../db/prismaSingleton.js";
 
 class CoachService {
     async upsertCoach(

@@ -1,5 +1,5 @@
-import CoachService from "../services/CoachService";
-import PlayerService from "../services/PlayerService";
+import CoachService from "../services/CoachService.js";
+import PlayerService from "../services/PlayerService.js";
 
 class PlayerController {
     async getTeamMembersByLeague(leagueCode: string) {

@@ -1,6 +1,6 @@
-import { PlayerModel } from "../models/Player";
+import { PlayerModel } from "../models/Player.js";
 import { Prisma } from "@prisma/client";
-import prisma from "../db/prismaSingleton";
+import prisma from "../db/prismaSingleton.js";
 
 class PlayerService {
     async upsertPlayer(

@@ -1,30 +1,23 @@
-# Use an official Node.js runtime as the base image
+# Use the official Node.js 18 image as a base
 FROM node:18
 
-# Set environment variables for your application (adjust these as needed)
-ENV NODE_ENV=development
-ENV PORT=3000
-
-# Install PostgreSQL client
-RUN apt-get update && apt-get install -y postgresql-client
-
-
-# Create and set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy package.json and package-lock.json (or npm-shrinkwrap.json) to the container
 COPY package*.json ./
 
-# Install application dependencies (including dev dependencies for build)
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy the rest of your application's source code
 COPY . .
 
+# Build the application
 RUN npm run build
 
-# Expose the port that your Node.js app will run on
-EXPOSE $PORT
+# Expose the port the app runs on
+EXPOSE 4000
 
-# Start your Node.js application in development mode
-ENTRYPOINT [ "npm", "start" ]
+# Command to run the application
+CMD ["npm", "start"]

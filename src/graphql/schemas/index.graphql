@@ -42,10 +42,10 @@ type Coach {
     nationality: String!
 }
 
-union TeamMember = Player | Coach
-
 type LeagueImportResponse {
     success: Boolean
     message: String
     league: Competition
 }
+
+union TeamMember = Player | Coach

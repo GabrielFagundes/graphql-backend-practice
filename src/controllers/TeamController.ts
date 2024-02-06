@@ -1,7 +1,7 @@
-import { TeamMember } from "../models/TeamMember";
-import CoachService from "../services/CoachService";
-import PlayerService from "../services/PlayerService";
-import TeamService from "../services/TeamService";
+import { TeamMember } from "../models/TeamMember.js";
+import CoachService from "../services/CoachService.js";
+import PlayerService from "../services/PlayerService.js";
+import TeamService from "../services/TeamService.js";
 import { Team as TeamModel } from "@prisma/client";
 
 class TeamController {

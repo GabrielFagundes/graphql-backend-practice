@@ -1,4 +1,4 @@
-import { TeamModel } from "./Team";
+import { TeamModel } from "./Team.js";
 
 export interface PlayerModel {
     id: number;

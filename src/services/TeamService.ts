@@ -1,6 +1,6 @@
-import { TeamModel } from "../models/Team";
+import { TeamModel } from "../models/Team.js";
 import { Prisma } from "@prisma/client";
-import prisma from "../db/prismaSingleton";
+import prisma from "../db/prismaSingleton.js";
 
 class TeamService {
     async upsertTeam(

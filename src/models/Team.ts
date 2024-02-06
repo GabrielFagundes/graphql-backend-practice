@@ -1,5 +1,5 @@
-import { CoachModel } from "./Coach";
-import { PlayerModel } from "./Player";
+import { CoachModel } from "./Coach.js";
+import { PlayerModel } from "./Player.js";
 
 export interface TeamModel {
     id: number;

@@ -1,14 +1,16 @@
-import CompetitionService from "../services/CompetitionService";
-import TeamService from "../services/TeamService";
-import PlayerService from "../services/PlayerService";
-import CoachService from "../services/CoachService";
-import { CoachModel } from "../models/Coach";
-import { PlayerModel } from "../models/Player";
-import { CompetitionModel } from "../models/Competition";
-import { TeamModel } from "../models/Team";
-import { toISODate } from "../utils/toISODate";
-import prisma from "../db/prismaSingleton"; // Import your singleton Prisma client instance
-import { fetchFootballData } from "../utils/fetchFooballData";
+import CompetitionService from "../services/CompetitionService.js";
+import TeamService from "../services/TeamService.js";
+import PlayerService from "../services/PlayerService.js";
+import CoachService from "../services/CoachService.js";
+import { CoachModel } from "../models/Coach.js";
+import { PlayerModel } from "../models/Player.js";
+import { CompetitionModel } from "../models/Competition.js";
+import { TeamModel } from "../models/Team.js";
+import { toISODate } from "../utils/toISODate.js";
+import prisma from "../db/prismaSingleton.js"; // Import your singleton Prisma client instance
+import { fetchFootballData } from "../utils/fetchFooballData.js";
+import { competitionSchema, teamSchema } from "../utils/validationSchemas.js";
+import { formatZodError } from "../utils/formatZodError.js";
 
 class LeagueController {
     async importLeagueData(leagueCode: string) {
@@ -33,6 +35,16 @@ class LeagueController {
                     code: competitionData?.code,
                     areaName: teams[0]?.area?.name,
                 };
+
+                // Validates API response against the app scheme defined
+                const validateCompetitionDataResponse =
+                    competitionSchema.safeParse(competition);
+                if (!validateCompetitionDataResponse.success) {
+                    return new Error(
+                        formatZodError(validateCompetitionDataResponse.error)
+                    );
+                }
+
                 await CompetitionService.upsertCompetition(
                     competition,
                     transaction
@@ -49,7 +61,16 @@ class LeagueController {
                         address: team.address,
                     };
 
-                    const existingTeam = await prisma.team.findUnique({
+                    // Validate API response against the schema defined in the application
+                    const validateTeamsDataResponse =
+                        teamSchema.safeParse(teamData);
+                    if (!validateTeamsDataResponse.success) {
+                        return new Error(
+                            formatZodError(validateTeamsDataResponse.error)
+                        );
+                    }
+
+                    const existingTeam = await transaction.team.findUnique({
                         where: { id: team.id },
                     });
 
@@ -79,7 +100,8 @@ class LeagueController {
                         });
                     }
 
-                    if (!existingTeam) continue;
+                    // Only import players on the first import of the team (according to business rules)
+                    if (existingTeam) continue;
 
                     // Import players or coach based on the squad data, using the transaction instance
                     if (team.squad && team.squad.length > 0) {

@@ -1,6 +1,6 @@
-import { CompetitionModel } from "../models/Competition";
+import { CompetitionModel } from "../models/Competition.js";
 import { Prisma } from "@prisma/client";
-import prisma from "../db/prismaSingleton";
+import prisma from "../db/prismaSingleton.js";
 
 class CompetitionService {
     async upsertCompetition(
