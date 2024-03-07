@@ -1,4 +1,4 @@
-# Santex Backend Test
+# Backend Practice
 
 This project is a Node.js application using TypeScript, GraphQL, and PostgreSQL, designed to demonstrate backend capabilities, including API integration, database management, and modern JavaScript practices.
 
@@ -17,8 +17,8 @@ These instructions will get you a copy of the project up and running on your loc
 1. **Clone the Repository**
 
     ```sh
-    git clone https://github.com/GabrielFagundes/santex-test-backend.git
-    cd santex-test-backend
+    git clone https://github.com/GabrielFagundes/graphql-backend-practice.git
+    cd graphql-backend-practice
     ```
 
 2. **Install dependencies**
